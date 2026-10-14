@@ -5,7 +5,7 @@ from flask import Flask, render_template_string, request
 app = Flask(__name__)
 
 # Load the trained Gaussian Naive Bayes model[cite: 1]
-with open('model.pkl', 'rb') as f:
+with open('naive.pkl', 'rb') as f:
     model = pickle.load(f)
 
 # Modern and responsive HTML/CSS Template
