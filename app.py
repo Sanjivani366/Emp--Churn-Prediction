@@ -1,14 +1,20 @@
+import os
 import pickle
 import numpy as np
 from flask import Flask, render_template_string, request
 
 app = Flask(__name__)
 
-# Load the trained Gaussian Naive Bayes model[cite: 1]
-with open('naive.pkl', 'rb') as f:
+# Load the trained Gaussian Naive Bayes model safely
+# Change 'naive.pkl' to match your actual filename if needed
+model_path = os.path.join(os.path.dirname(__file__), 'naive.pkl')
+if not os.path.exists(model_path):
+    model_path = os.path.join(os.path.dirname(__file__), 'naive.pkl')
+
+with open(model_path, 'rb') as f:
     model = pickle.load(f)
 
-# Modern and responsive HTML/CSS Template
+# Modern and responsive Dark HTML/CSS Template
 TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +25,8 @@ TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -27,17 +34,33 @@ TEMPLATE = """
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .card {
-            border: none;
+            background-color: #111827;
+            border: 1px solid #374151;
             border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            color: #f8fafc;
+        }
+        .form-control, .form-select {
+            background-color: #1f2937;
+            border: 1px solid #4b5563;
+            color: #f8fafc;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #1f2937;
+            color: #f8fafc;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+        }
+        .form-control::placeholder {
+            color: #9ca3af;
         }
         .btn-custom {
-            background-color: #667eea;
+            background-color: #6366f1;
             color: white;
             transition: background 0.3s ease;
         }
         .btn-custom:hover {
-            background-color: #5a6fe8;
+            background-color: #4f46e5;
             color: white;
         }
     </style>
@@ -46,10 +69,10 @@ TEMPLATE = """
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <div class="card p-4 p-md-5 bg-white">
+                <div class="card p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold text-dark">Employee Predictor</h2>
-                        <p class="text-muted">Enter employee details to run predictions</p>
+                        <h2 class="fw-bold text-light">Employee Predictor</h2>
+                        <p class="text-secondary">Enter employee details to run predictions</p>
                     </div>
 
                     <form method="POST">
@@ -110,7 +133,7 @@ TEMPLATE = """
                     </form>
 
                     {% if prediction is not none %}
-                        <div class="alert mt-4 text-center {% if prediction == 1 %}alert-danger{% else %}alert-success{% endif %}" role="alert">
+                        <div class="alert mt-4 text-center {% if prediction == 1 %}alert-danger bg-danger text-white border-0{% else %}alert-success bg-success text-white border-0{% endif %}" role="alert">
                             <h4 class="alert-heading fw-bold">Prediction Result</h4>
                             <p class="mb-0 fs-5">
                                 {% if prediction == 1 %}
@@ -134,7 +157,7 @@ def home():
     prediction = None
     if request.method == 'POST':
         try:
-            # Extract form values matching the model features[cite: 1]
+            # Extract form values matching the model features
             education = request.form['Education']
             city = request.form['City']
             joining_year = float(request.form['JoiningYear'])
@@ -143,7 +166,7 @@ def home():
             experience = float(request.form['ExperienceInCurrentDomain'])
             age = float(request.form['Age'])
             
-            # Map categorical inputs to numeric values if your pipeline used encoding
+            # Map categorical inputs to numeric values
             edu_map = {'Bachelors': 0, 'Masters': 1, 'PHD': 2}
             city_map = {'Bangalore': 0, 'Pune': 1, 'New Delhi': 2}
             gender_map = {'Male': 0, 'Female': 1}
